@@ -1,8 +1,8 @@
 import { useState, type ChangeEvent } from "react";
 import { Link } from "react-router-dom";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
+import { Label } from "@/components/ui/Label";
 import { Mail, Lock, Loader2 } from "lucide-react";
 // interface LoginInput {
 //   email: string;
