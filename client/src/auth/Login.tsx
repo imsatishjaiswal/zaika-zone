@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ChangeEvent } from "react";
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -11,18 +11,24 @@ import { Mail, Lock, Loader2 } from "lucide-react";
 // interface LoginInputWithAge extends LoginInput {
 //   age: string;
 // }
-// type LoginInput = {
-//   email: string;
-//   password: string;
-// };
+type LoginInput = {
+  email: string;
+  password: string;
+};
 const Login = () => {
   const [loading, setLoading] = useState(false);
-  //   const [input, setInput] = useState<LoginInput>({
-  //     email: "",
-  //     password: "",
-  //   });
-  const handleSubmit = (e: React.FormEvent) => {
+  const [input, setInput] = useState<LoginInput>({
+    email: "",
+    password: "",
+  });
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setInput({ ...input, [name]: value });
+  };
+  const handleFormSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
+    console.log("input", input);
+
     setLoading(true);
     // Simulate login for now
     setTimeout(() => setLoading(false), 2000);
@@ -44,7 +50,7 @@ const Login = () => {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleFormSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label
                 htmlFor="email"
@@ -59,7 +65,10 @@ const Login = () => {
                 <Input
                   id="email"
                   type="email"
+                  name="email"
                   placeholder="name@example.com"
+                  value={input.email}
+                  onChange={handleInputChange}
                   className="pl-10 h-11 bg-zinc-50/50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all rounded-xl"
                   required
                 />
@@ -88,7 +97,10 @@ const Login = () => {
                 <Input
                   id="password"
                   type="password"
+                  name="password"
                   placeholder="••••••••"
+                  value={input.password}
+                  onChange={handleInputChange}
                   className="pl-10 h-11 bg-zinc-50/50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all rounded-xl"
                   required
                 />
