@@ -1,16 +1,20 @@
 import { useState, type ChangeEvent } from "react";
+import { useTitle } from "react-meta-hooks";
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Label } from "@/components/ui/Label";
 import { Mail, Lock, Loader2, User, Phone } from "lucide-react";
-type SignupInput = {
-  fullName: string;
-  email: string;
-  mobileNumber: string;
-  password: string;
-};
+import { userSignUpSchema, type SignupInput } from "@/schema/userSchema";
+
+// type SignupInput = {
+//   fullName: string;
+//   email: string;
+//   mobileNumber: string;
+//   password: string;
+// };
 const Signup = () => {
+  useTitle("Sign Up | Zaika Zone");
   const [loading, setLoading] = useState(false);
   const [input, setInput] = useState<SignupInput>({
     fullName: "",
@@ -18,15 +22,35 @@ const Signup = () => {
     mobileNumber: "",
     password: "",
   });
+  const [errors, setErrors] = useState<Partial<SignupInput>>({});
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
     setInput({ ...input, [id]: value });
+    // Clear the error for this specific field as the user types
+    if (errors[id as keyof SignupInput]) {
+      setErrors((prev) => ({ ...prev, [id]: undefined }));
+    }
   };
   const handleFormSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const validationResult = userSignUpSchema.safeParse(input);
+    if (!validationResult.success) {
+      const fieldErrors = validationResult.error.flatten().fieldErrors;
+      // Convert arrays of strings into single strings for your state
+      const errorMessages: Partial<SignupInput> = {};
+      Object.keys(fieldErrors).forEach((key) => {
+        const messages = fieldErrors[key as keyof typeof fieldErrors];
+        if (messages && messages.length > 0) {
+          errorMessages[key as keyof SignupInput] = messages[0]; // Take the first message
+        }
+      });
+      setErrors(errorMessages);
+      return;
+    }
+    // Clear errors if validation is successful
+    setErrors({});
     console.log("input", input);
     setLoading(true);
-    // Simulate signup for now
     setTimeout(() => setLoading(false), 2000);
   };
 
@@ -46,7 +70,7 @@ const Signup = () => {
             </p>
           </div>
 
-          <form onSubmit={handleFormSubmit} className="space-y-4">
+          <form onSubmit={handleFormSubmit} noValidate className="space-y-4">
             <div className="space-y-1.5">
               <Label
                 htmlFor="fullName"
@@ -65,10 +89,16 @@ const Signup = () => {
                   type="text"
                   placeholder="John Doe"
                   onChange={handleInputChange}
-                  className="pl-10 h-10 bg-zinc-50/50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all rounded-xl"
-                  required
+                  className={`pl-10 h-10 bg-zinc-50/50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all rounded-xl ${
+                    errors.fullName ? "border-red-500 focus:border-red-500" : ""
+                  }`}
                 />
               </div>
+              {errors.fullName && (
+                <p className="text-xs text-red-500 mt-1 ml-1 font-medium">
+                  {errors.fullName}
+                </p>
+              )}
             </div>
 
             <div className="space-y-1.5">
@@ -89,10 +119,16 @@ const Signup = () => {
                   value={input.email}
                   onChange={handleInputChange}
                   placeholder="name@example.com"
-                  className="pl-10 h-10 bg-zinc-50/50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all rounded-xl"
-                  required
+                  className={`pl-10 h-10 bg-zinc-50/50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all rounded-xl ${
+                    errors.email ? "border-red-500 focus:border-red-500" : ""
+                  }`}
                 />
               </div>
+              {errors.email && (
+                <p className="text-xs text-red-500 mt-1 ml-1 font-medium">
+                  {errors.email}
+                </p>
+              )}
             </div>
 
             <div className="space-y-1.5">
@@ -113,10 +149,18 @@ const Signup = () => {
                   onChange={handleInputChange}
                   type="tel"
                   placeholder="+1 (555) 000-0000"
-                  className="pl-10 h-10 bg-zinc-50/50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all rounded-xl"
-                  required
+                  className={`pl-10 h-10 bg-zinc-50/50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all rounded-xl ${
+                    errors.mobileNumber
+                      ? "border-red-500 focus:border-red-500"
+                      : ""
+                  }`}
                 />
               </div>
+              {errors.mobileNumber && (
+                <p className="text-xs text-red-500 mt-1 ml-1 font-medium">
+                  {errors.mobileNumber}
+                </p>
+              )}
             </div>
 
             <div className="space-y-1.5">
@@ -137,10 +181,16 @@ const Signup = () => {
                   value={input.password}
                   onChange={handleInputChange}
                   placeholder="••••••••"
-                  className="pl-10 h-10 bg-zinc-50/50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all rounded-xl"
-                  required
+                  className={`pl-10 h-10 bg-zinc-50/50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all rounded-xl ${
+                    errors.password ? "border-red-500 focus:border-red-500" : ""
+                  }`}
                 />
               </div>
+              {errors.password && (
+                <p className="text-xs text-red-500 mt-1 ml-1 font-medium">
+                  {errors.password}
+                </p>
+              )}
             </div>
 
             <Button

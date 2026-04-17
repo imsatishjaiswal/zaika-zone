@@ -1,32 +1,45 @@
 import { useState, type ChangeEvent } from "react";
+import { useTitle } from "react-meta-hooks";
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Label } from "@/components/ui/Label";
 import { Mail, Lock, Loader2 } from "lucide-react";
-// interface LoginInput {
-//   email: string;
-//   password: string;
-// }
-// interface LoginInputWithAge extends LoginInput {
-//   age: string;
-// }
-type LoginInput = {
-  email: string;
-  password: string;
-};
+import { userSignInSchema, type LoginInput } from "@/schema/userSchema";
 const Login = () => {
+  useTitle("Sign In | Zaika Zone");
   const [loading, setLoading] = useState(false);
   const [input, setInput] = useState<LoginInput>({
     email: "",
     password: "",
   });
+  const [errors, setErrors] = useState<Partial<LoginInput>>({});
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setInput({ ...input, [name]: value });
+    // Clear the error for this specific field as the user types
+    if (errors[name as keyof LoginInput]) {
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
   };
   const handleFormSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const validationResult = userSignInSchema.safeParse(input);
+    if (!validationResult.success) {
+      const fieldErrors = validationResult.error.flatten().fieldErrors;
+      // Convert arrays of strings into single strings for your state
+      const errorMessages: Partial<LoginInput> = {};
+      Object.keys(fieldErrors).forEach((key) => {
+        const messages = fieldErrors[key as keyof typeof fieldErrors];
+        if (messages && messages.length > 0) {
+          errorMessages[key as keyof LoginInput] = messages[0]; // Take the first message
+        }
+      });
+      setErrors(errorMessages);
+      return;
+    }
+    // Clear errors if validation is successful
+    setErrors({});
     console.log("input", input);
 
     setLoading(true);
@@ -50,7 +63,7 @@ const Login = () => {
             </p>
           </div>
 
-          <form onSubmit={handleFormSubmit} className="space-y-6">
+          <form onSubmit={handleFormSubmit} noValidate className="space-y-6">
             <div className="space-y-2">
               <Label
                 htmlFor="email"
@@ -69,9 +82,15 @@ const Login = () => {
                   placeholder="name@example.com"
                   value={input.email}
                   onChange={handleInputChange}
-                  className="pl-10 h-11 bg-zinc-50/50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all rounded-xl"
-                  required
+                  className={`pl-10 h-11 bg-zinc-50/50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all rounded-xl ${
+                    errors.email ? "border-red-500 focus:border-red-500" : ""
+                  }`}
                 />
+                {errors.email && (
+                  <p className="text-xs text-red-500 mt-1 ml-1 font-medium">
+                    {errors.email}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -101,9 +120,15 @@ const Login = () => {
                   placeholder="••••••••"
                   value={input.password}
                   onChange={handleInputChange}
-                  className="pl-10 h-11 bg-zinc-50/50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all rounded-xl"
-                  required
+                  className={`pl-10 h-11 bg-zinc-50/50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all rounded-xl ${
+                    errors.password ? "border-red-500 focus:border-red-500" : ""
+                  }`}
                 />
+                {errors.password && (
+                  <p className="text-xs text-red-500 mt-1 ml-1 font-medium">
+                    {errors.password}
+                  </p>
+                )}
               </div>
             </div>
 

@@ -3,8 +3,9 @@ import { Input } from "@/components/ui/Input";
 import { Link } from "react-router-dom";
 import { ArrowRight, Utensils, Star, ShieldCheck, Search } from "lucide-react";
 import { useState } from "react";
-
+import { useTitle } from "react-meta-hooks";
 const Home = () => {
+  useTitle("Home | Zaika Zone");
   const [searchText, setSearchText] = useState("");
 
   const handleSearch = (e: React.FormEvent) => {
