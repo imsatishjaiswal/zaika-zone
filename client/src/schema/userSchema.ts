@@ -27,3 +27,28 @@ export const userSignInSchema = z.object({
 })
 
 export type LoginInput = z.infer<typeof userSignInSchema>;
+
+
+export const userForgotPasswordSchema = z.object({
+    email: z.string().min(1, "Email is required").email("Invalid email address"),
+});
+
+export type ForgotPasswordInput = z.infer<typeof userForgotPasswordSchema>;
+
+
+//Reset Password
+export const userResetPasswordSchema = z.object({
+    password: z.string().min(1, "Password is required").min(6, "Password must be at least 6 characters"),
+    confirmPassword: z.string().min(1, "Confirm Password is required")
+}).superRefine(({ confirmPassword, password }, ctx) => {
+    if (confirmPassword !== password) {
+        ctx.addIssue({
+            code: "custom",
+            message: "The passwords did not match",
+            path: ["confirmPassword"]
+        });
+    }
+});
+
+export type ResetPasswordInput = z.infer<typeof userResetPasswordSchema>;
+

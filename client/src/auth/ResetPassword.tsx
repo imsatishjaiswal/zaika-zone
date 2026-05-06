@@ -4,49 +4,58 @@ import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Label } from "@/components/ui/Label";
-import { Mail, Lock, Loader2 } from "lucide-react";
-import { userSignInSchema } from "@/schema/userSchema";
-import type { LoginInput } from "@/schema/userSchema";
+import { Lock, Loader2, ArrowLeft } from "lucide-react";
+import {
+  userResetPasswordSchema,
+  type ResetPasswordInput,
+} from "@/schema/userSchema";
 
-const Login = () => {
-  useTitle("Sign In | Zaika Zone");
+const ResetPassword = () => {
+  useTitle("Reset Password | Zaika Zone");
   const [loading, setLoading] = useState(false);
-  const [input, setInput] = useState<LoginInput>({
-    email: "",
+  const [input, setInput] = useState<ResetPasswordInput>({
     password: "",
+    confirmPassword: "",
   });
-  const [errors, setErrors] = useState<Partial<LoginInput>>({});
+  const [errors, setErrors] = useState<Partial<ResetPasswordInput>>({});
+
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setInput({ ...input, [name]: value });
-    // Clear the error for this specific field as the user types
-    if (errors[name as keyof LoginInput]) {
+    // Clear error when user types
+    if (errors[name as keyof ResetPasswordInput]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
   };
+
   const handleFormSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const validationResult = userSignInSchema.safeParse(input);
+    const validationResult = userResetPasswordSchema.safeParse(input);
+
     if (!validationResult.success) {
       const fieldErrors = validationResult.error.flatten().fieldErrors;
-      // Convert arrays of strings into single strings for your state
-      const errorMessages: Partial<LoginInput> = {};
+      const errorMessages: Partial<ResetPasswordInput> = {};
       Object.keys(fieldErrors).forEach((key) => {
         const messages = fieldErrors[key as keyof typeof fieldErrors];
         if (messages && messages.length > 0) {
-          errorMessages[key as keyof LoginInput] = messages[0]; // Take the first message
+          errorMessages[key as keyof ResetPasswordInput] = messages[0];
         }
       });
       setErrors(errorMessages);
       return;
     }
-    // Clear errors if validation is successful
-    setErrors({});
-    console.log("input", input);
 
+    setErrors({});
     setLoading(true);
-    // Simulate login for now
-    setTimeout(() => setLoading(false), 2000);
+
+    // Simulate API call
+    console.log("Updating password...");
+    setTimeout(() => {
+      setLoading(false);
+      alert(
+        "Your password has been reset successfully. You can now log in with your new password.",
+      );
+    }, 2000);
   };
 
   return (
@@ -58,59 +67,21 @@ const Login = () => {
               <span className="text-white text-2xl font-bold italic">Z</span>
             </div>
             <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-white">
-              Zaika Zone
+              Reset Password
             </h1>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-2">
-              Welcome back! Please login to your account.
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-2 text-center">
+              Please enter your new password below to secure your account.
             </p>
           </div>
 
           <form onSubmit={handleFormSubmit} noValidate className="space-y-6">
             <div className="space-y-2">
               <Label
-                htmlFor="email"
+                htmlFor="password"
                 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 ml-1"
               >
-                Email Address
+                New Password
               </Label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none transition-colors group-focus-within:text-orange-500 text-zinc-400">
-                  <Mail className="size-4" />
-                </div>
-                <Input
-                  id="email"
-                  type="email"
-                  name="email"
-                  placeholder="name@example.com"
-                  value={input.email}
-                  onChange={handleInputChange}
-                  className={`pl-10 h-11 bg-zinc-50/50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all rounded-xl ${
-                    errors.email ? "border-red-500 focus:border-red-500" : ""
-                  }`}
-                />
-                {errors.email && (
-                  <p className="text-xs text-red-500 mt-1 ml-1 font-medium">
-                    {errors.email}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center justify-between ml-1">
-                <Label
-                  htmlFor="password"
-                  className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
-                >
-                  Password
-                </Label>
-                <Link
-                  to="/forgot-password"
-                  className="text-xs font-semibold text-orange-500 hover:text-orange-600 transition-colors"
-                >
-                  Forgot Password?
-                </Link>
-              </div>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none transition-colors group-focus-within:text-orange-500 text-zinc-400">
                   <Lock className="size-4" />
@@ -134,6 +105,38 @@ const Login = () => {
               </div>
             </div>
 
+            <div className="space-y-2">
+              <Label
+                htmlFor="confirmPassword"
+                className="text-sm font-medium text-zinc-700 dark:text-zinc-300 ml-1"
+              >
+                Confirm New Password
+              </Label>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none transition-colors group-focus-within:text-orange-500 text-zinc-400">
+                  <Lock className="size-4" />
+                </div>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  name="confirmPassword"
+                  placeholder="••••••••"
+                  value={input.confirmPassword}
+                  onChange={handleInputChange}
+                  className={`pl-10 h-11 bg-zinc-50/50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all rounded-xl ${
+                    errors.confirmPassword
+                      ? "border-red-500 focus:border-red-500"
+                      : ""
+                  }`}
+                />
+                {errors.confirmPassword && (
+                  <p className="text-xs text-red-500 mt-1 ml-1 font-medium">
+                    {errors.confirmPassword}
+                  </p>
+                )}
+              </div>
+            </div>
+
             <Button
               type="submit"
               disabled={loading}
@@ -142,24 +145,22 @@ const Login = () => {
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Logging in...
+                  Resetting...
                 </>
               ) : (
-                "Sign In"
+                "Reset Password"
               )}
             </Button>
           </form>
 
           <div className="mt-8 text-center">
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">
-              Don&apos;t have an account?{" "}
-              <Link
-                to="/signup"
-                className="font-semibold text-orange-500 hover:text-orange-600 transition-colors"
-              >
-                Sign up free
-              </Link>
-            </p>
+            <Link
+              to="/login"
+              className="inline-flex items-center text-sm font-semibold text-zinc-500 hover:text-orange-500 transition-colors"
+            >
+              <ArrowLeft className="mr-2 size-4" />
+              Back to Sign In
+            </Link>
           </div>
         </div>
       </div>
@@ -167,4 +168,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default ResetPassword;
